@@ -8,6 +8,12 @@
   "assets": {
     "directory": "./dist/client"
   },
+  "routes": [
+    {
+      "pattern": "al.osada.us",
+      "custom_domain": true
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",
@@ -17,7 +23,7 @@
   ],
   "vars": {
     "APP_NAME": "GitHub Star / Lists CRM",
-    "APP_ORIGIN": "https://github-star-lists-crm.dai.workers.dev",
+    "APP_ORIGIN": "https://al.osada.us",
     "LIST_LIMIT": "32",
     "SELF_ONLY_GITHUB_LOGIN": "",
     "SESSION_COOKIE_NAME": "gslcrm_session"

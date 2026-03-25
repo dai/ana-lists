@@ -41,6 +41,28 @@ cd app
 npm run dev:client
 ```
 
+### Windows での起動
+
+`cmd` または PowerShell でそのまま実行できます。
+
+```powershell
+cd C:\dai\GitHub\playground\app
+npx wrangler d1 migrations apply github-star-lists-crm --local
+npm run dev
+```
+
+フロントだけ確認する場合:
+
+```powershell
+cd C:\dai\GitHub\playground\app
+npm run dev:client
+```
+
+通常の確認先:
+
+- Worker API 込み: `http://localhost:8787`
+- フロントのみ: `http://localhost:4173`
+
 ## ローカル環境変数
 
 `app/.dev.vars` を使います。例:

@@ -41,6 +41,28 @@ cd app
 npm run dev:client
 ```
 
+### Running on Windows
+
+You can run the project directly from `cmd` or PowerShell.
+
+```powershell
+cd C:\dai\GitHub\playground\app
+npx wrangler d1 migrations apply github-star-lists-crm --local
+npm run dev
+```
+
+Frontend-only preview:
+
+```powershell
+cd C:\dai\GitHub\playground\app
+npm run dev:client
+```
+
+Typical local URLs:
+
+- Full Worker app: `http://localhost:8787`
+- Frontend only: `http://localhost:4173`
+
 ## Local environment
 
 Use `app/.dev.vars`. Example:
