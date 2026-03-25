@@ -1,4 +1,4 @@
-# ana-lists
+# Anh-lists
 
 [English README](./README-en.md)
 
@@ -46,7 +46,7 @@ npm run dev:client
 `cmd` または PowerShell でそのまま実行できます。
 
 ```powershell
-cd C:\playground\app
+cd \app
 npx wrangler d1 migrations apply your−workers−name −−local
 npm run dev
 ```
@@ -54,7 +54,7 @@ npm run dev
 フロントだけ確認する場合:
 
 ```powershell
-cd C:\playground\app
+cd \app
 npm run dev:client
 ```
 
