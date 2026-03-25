@@ -1,0 +1,389 @@
+:root {
+	--bg: #f2ecdf;
+	--bg-panel: rgba(255, 252, 245, 0.82);
+	--bg-panel-strong: #fff9ef;
+	--ink: #1f2722;
+	--muted: #5c645d;
+	--line: rgba(31, 39, 34, 0.12);
+	--accent: #0f766e;
+	--accent-2: #c96b2c;
+	--danger: #9f3d32;
+	--shadow: 0 18px 60px rgba(45, 40, 26, 0.12);
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	font-family: "Space Grotesk", "Avenir Next", sans-serif;
+	background:
+		radial-gradient(circle at top left, rgba(15, 118, 110, 0.18), transparent 28%),
+		radial-gradient(circle at bottom right, rgba(201, 107, 44, 0.2), transparent 26%),
+		linear-gradient(180deg, #f8f3e8 0%, #efe4d3 100%);
+	color: var(--ink);
+	min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+}
+
+code,
+small {
+	font-family: "IBM Plex Mono", monospace;
+}
+
+.app-shell {
+	max-width: 1480px;
+	margin: 0 auto;
+	padding: 32px 24px 56px;
+}
+
+.hero {
+	display: grid;
+	grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+	gap: 24px;
+	padding: 28px;
+	border: 1px solid var(--line);
+	border-radius: 28px;
+	background: linear-gradient(135deg, rgba(255, 250, 241, 0.92), rgba(245, 236, 223, 0.86));
+	box-shadow: var(--shadow);
+}
+
+.eyebrow {
+	margin: 0 0 8px;
+	text-transform: uppercase;
+	letter-spacing: 0.18em;
+	font-size: 12px;
+	color: var(--accent);
+}
+
+.hero h1 {
+	margin: 0;
+	font-size: clamp(2.4rem, 4vw, 4.6rem);
+	line-height: 0.95;
+	max-width: 12ch;
+}
+
+.hero-copy {
+	max-width: 64ch;
+	color: var(--muted);
+	font-size: 1rem;
+	line-height: 1.65;
+}
+
+.status-panel,
+.panel {
+	border: 1px solid var(--line);
+	border-radius: 24px;
+	background: var(--bg-panel);
+	backdrop-filter: blur(12px);
+	box-shadow: var(--shadow);
+}
+
+.status-panel {
+	padding: 18px;
+	display: grid;
+	gap: 12px;
+	align-content: start;
+}
+
+.status-row {
+	display: flex;
+	justify-content: space-between;
+	gap: 16px;
+	font-size: 0.92rem;
+	color: var(--muted);
+}
+
+.status-row strong {
+	color: var(--ink);
+	text-align: right;
+}
+
+.layout-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 24px;
+	margin-top: 24px;
+}
+
+.layout-grid.wide {
+	grid-template-columns: 1.25fr 1fr;
+}
+
+.panel {
+	padding: 24px;
+}
+
+.panel-header {
+	display: grid;
+	gap: 6px;
+	margin-bottom: 18px;
+}
+
+.panel-header h2 {
+	margin: 0;
+	font-size: 1.45rem;
+}
+
+.panel-header p,
+.helper-copy,
+.compact-copy,
+.empty-state {
+	margin: 0;
+	color: var(--muted);
+	line-height: 1.5;
+}
+
+.track-form,
+.filters,
+.workspace-actions,
+.auth-stack {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	align-items: center;
+}
+
+.text-input,
+.import-area {
+	width: 100%;
+	border: 1px solid var(--line);
+	border-radius: 14px;
+	padding: 12px 14px;
+	background: rgba(255, 252, 246, 0.95);
+	color: var(--ink);
+}
+
+.track-form .text-input {
+	flex: 1;
+	min-width: 220px;
+}
+
+.filters .text-input,
+.filters select {
+	flex: 1 1 180px;
+}
+
+.import-area {
+	min-height: 140px;
+	resize: vertical;
+}
+
+.primary-button,
+.secondary-button,
+.ghost-button,
+.inline-link {
+	border: 0;
+	border-radius: 999px;
+	padding: 12px 18px;
+	cursor: pointer;
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.primary-button {
+	background: linear-gradient(135deg, var(--accent), #146c89);
+	color: white;
+}
+
+.secondary-button {
+	background: rgba(15, 118, 110, 0.1);
+	color: var(--accent);
+	border: 1px solid rgba(15, 118, 110, 0.18);
+}
+
+.ghost-button {
+	background: transparent;
+	color: var(--ink);
+	border: 1px solid var(--line);
+}
+
+.checkbox {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--muted);
+}
+
+.repo-list,
+.stargazer-grid,
+.diff-stack,
+.history-grid {
+	display: grid;
+	gap: 14px;
+}
+
+.repo-card,
+.stargazer-card,
+.history-card,
+.diff-card,
+.list-chip {
+	border: 1px solid var(--line);
+	border-radius: 18px;
+	padding: 16px;
+	background: var(--bg-panel-strong);
+}
+
+.repo-card {
+	display: flex;
+	justify-content: space-between;
+	gap: 16px;
+	align-items: start;
+}
+
+.repo-card h3,
+.stargazer-card h3,
+.history-card strong {
+	margin: 0 0 4px;
+}
+
+.stargazer-grid {
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.stargazer-card {
+	display: grid;
+	gap: 12px;
+}
+
+.stargazer-head,
+.metric-row,
+.tag-row,
+.list-columns,
+.diff-grid,
+.history-grid {
+	display: flex;
+	gap: 12px;
+}
+
+.stargazer-head,
+.metric-row {
+	justify-content: space-between;
+	align-items: start;
+}
+
+.metric-row,
+.tag-row,
+.helper-copy,
+.note,
+.history-card,
+.diff-card,
+.list-chip {
+	font-size: 0.9rem;
+}
+
+.tag {
+	display: inline-flex;
+	align-items: center;
+	padding: 6px 10px;
+	border-radius: 999px;
+	background: rgba(15, 118, 110, 0.1);
+	color: var(--accent);
+}
+
+.tag.muted {
+	background: rgba(31, 39, 34, 0.06);
+	color: var(--muted);
+}
+
+.tag.accent {
+	background: rgba(201, 107, 44, 0.16);
+	color: var(--accent-2);
+}
+
+.list-columns,
+.diff-grid {
+	align-items: stretch;
+}
+
+.list-column {
+	flex: 1;
+	display: grid;
+	gap: 12px;
+}
+
+.list-column.stretch {
+	flex: 2;
+}
+
+.workspace-table {
+	display: grid;
+	gap: 12px;
+	max-height: 560px;
+	overflow: auto;
+	padding-right: 8px;
+}
+
+.workspace-row {
+	display: grid;
+	grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+	gap: 16px;
+	padding: 16px;
+	border-radius: 18px;
+	border: 1px solid var(--line);
+	background: rgba(255, 255, 255, 0.74);
+}
+
+.checkbox-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+	gap: 8px;
+}
+
+.diff-grid > div {
+	flex: 1;
+}
+
+.diff-card.add {
+	border-color: rgba(15, 118, 110, 0.25);
+}
+
+.diff-card.remove {
+	border-color: rgba(159, 61, 50, 0.25);
+}
+
+.history-grid {
+	flex-wrap: wrap;
+}
+
+.history-card {
+	flex: 1 1 220px;
+	display: grid;
+	gap: 6px;
+}
+
+.error-banner {
+	margin-top: 20px;
+	padding: 14px 16px;
+	border-radius: 16px;
+	background: rgba(159, 61, 50, 0.12);
+	border: 1px solid rgba(159, 61, 50, 0.22);
+	color: var(--danger);
+}
+
+@media (max-width: 1024px) {
+	.hero,
+	.layout-grid,
+	.layout-grid.wide,
+	.workspace-row,
+	.diff-grid,
+	.list-columns {
+		grid-template-columns: 1fr;
+		display: grid;
+	}
+
+	.repo-card,
+	.stargazer-head,
+	.metric-row {
+		flex-direction: column;
+	}
+}

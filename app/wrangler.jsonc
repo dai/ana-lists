@@ -1,0 +1,27 @@
+{
+  "name": "github-star-lists-crm",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-03-10",
+  "compatibility_flags": [
+    "global_fetch_strictly_public"
+  ],
+  "assets": {
+    "directory": "./dist/client"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "github-star-lists-crm",
+      "database_id": "00000000-0000-0000-0000-000000000000"
+    }
+  ],
+  "vars": {
+    "APP_NAME": "GitHub Star / Lists CRM",
+    "LIST_LIMIT": "32",
+    "SELF_ONLY_GITHUB_LOGIN": "",
+    "SESSION_COOKIE_NAME": "gslcrm_session"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

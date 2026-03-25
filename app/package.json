@@ -1,0 +1,32 @@
+{
+	"name": "github-star-lists-crm",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "vite build",
+		"deploy": "npm run build && wrangler deploy",
+		"dev": "wrangler dev",
+		"dev:client": "vite",
+		"start": "wrangler dev",
+		"test": "vitest",
+		"test:run": "vitest --run",
+		"typecheck": "tsc --noEmit",
+		"cf-typegen": "wrangler types"
+	},
+	"dependencies": {
+		"react": "^19.2.4",
+		"react-dom": "^19.2.4"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "^0.12.4",
+		"@cloudflare/workers-types": "^4.20260317.1",
+		"@types/react": "^19.2.2",
+		"@types/react-dom": "^19.2.2",
+		"@vitejs/plugin-react": "^6.0.1",
+		"typescript": "^5.5.2",
+		"vite": "^8.0.2",
+		"vitest": "~3.2.0",
+		"wrangler": "^3.101.0"
+	}
+}
