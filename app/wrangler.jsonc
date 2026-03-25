@@ -12,11 +12,12 @@
     {
       "binding": "DB",
       "database_name": "github-star-lists-crm",
-      "database_id": "00000000-0000-0000-0000-000000000000"
+      "database_id": "ded28576-866c-4f2b-9c0b-4eb1fedf4c23"
     }
   ],
   "vars": {
     "APP_NAME": "GitHub Star / Lists CRM",
+    "APP_ORIGIN": "https://github-star-lists-crm.dai.workers.dev",
     "LIST_LIMIT": "32",
     "SELF_ONLY_GITHUB_LOGIN": "",
     "SESSION_COOKIE_NAME": "gslcrm_session"
