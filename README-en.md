@@ -1,8 +1,8 @@
 # ana-lists
 
-[日本語 README](./README.md)
+[Japanese README](./README.md)
 
-A private CRM for GitHub `Stars` and official GitHub `Lists`.  
+A private CRM for GitHub `Stars` and official GitHub `Lists`.
 It lets you explore stargazers for any public repository, keep private notes and tags on people, and import your starred repositories / Lists to plan bulk organization work.
 
 The current application lives in [`app/`](./app).
@@ -112,3 +112,18 @@ On Cloudflare, configure `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and `SESSIO
 
 - Direct writeback to GitHub Lists is not implemented in v1
 - The import helper depends on GitHub page structure and may need selector updates
+
+## Billing Safety
+
+To prevent unexpected Cloudflare D1 billing, the following limits are enforced:
+
+- **Stargazer sync**: Maximum 5,000 stargazers per repository sync
+- **Profile fetch**: Up to 500 detailed profiles per sync (remainder stored with minimal data)
+- **D1 batch operations**: All batch inserts are chunked to 100 statements per batch
+- **Query limits**: List queries have limits (500-10,000 rows) to prevent unbounded reads
+- **Database indexes**: 9 indexes added to optimize common queries and reduce full table scans
+
+If you need higher limits for personal use, adjust these constants in the source code:
+- `MAX_STARGZERS_PER_SYNC` in `src/server/github.ts`
+- `PROFILE_FETCH_LIMIT` in `src/server/github.ts`
+- `D1_BATCH_CHUNK_SIZE` in `src/server/store.ts`

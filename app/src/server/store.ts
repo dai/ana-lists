@@ -42,6 +42,15 @@ type ImportPayload = {
 	memberships: ImportedRepositoryMembership[];
 };
 
+const D1_BATCH_CHUNK_SIZE = 100;
+
+async function executeChunkedBatch(db: D1Database, statements: D1PreparedStatement[]) {
+	for (let i = 0; i < statements.length; i += D1_BATCH_CHUNK_SIZE) {
+		const chunk = statements.slice(i, i + D1_BATCH_CHUNK_SIZE);
+		await db.batch(chunk);
+	}
+}
+
 export class D1Store {
 	constructor(private readonly db: D1Database) {}
 
@@ -248,11 +257,10 @@ export class D1Store {
 			.run();
 
 		if (stargazers.length > 0) {
-			await this.db.batch(
-				stargazers.map((stargazer) =>
-					this.db
-						.prepare(
-							`INSERT INTO stargazer_snapshots (
+			const statements = stargazers.map((stargazer) =>
+				this.db
+					.prepare(
+						`INSERT INTO stargazer_snapshots (
                   user_id,
                   tracked_repository_id,
                   github_user_id,
@@ -265,22 +273,22 @@ export class D1Store {
                   starred_at,
                   snapshot_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-						)
-						.bind(
-							userId,
-							repositoryId,
-							stargazer.githubUserId,
-							stargazer.login,
-							stargazer.name,
-							stargazer.bio,
-							stargazer.company,
-							stargazer.followers,
-							stargazer.publicRepos,
-							stargazer.starredAt,
-							now,
-						),
-				),
+					)
+					.bind(
+						userId,
+						repositoryId,
+						stargazer.githubUserId,
+						stargazer.login,
+						stargazer.name,
+						stargazer.bio,
+						stargazer.company,
+						stargazer.followers,
+						stargazer.publicRepos,
+						stargazer.starredAt,
+						now,
+					),
 			);
+			await executeChunkedBatch(this.db, statements);
 		}
 
 		await this.db
@@ -317,7 +325,8 @@ export class D1Store {
           AND a.github_user_id = s.github_user_id
          WHERE s.user_id = ?
          GROUP BY s.github_user_id
-         ORDER BY MAX(s.starred_at) DESC`,
+         ORDER BY MAX(s.starred_at) DESC
+         LIMIT 1000`,
 			)
 			.bind(userId)
 			.all<{
@@ -343,7 +352,8 @@ export class D1Store {
          FROM stargazer_snapshots s
          JOIN tracked_repositories tr ON tr.id = s.tracked_repository_id
          WHERE s.user_id = ?
-         ORDER BY tr.full_name`,
+         ORDER BY tr.full_name
+         LIMIT 5000`,
 			)
 			.bind(userId)
 			.all<{
@@ -412,24 +422,22 @@ export class D1Store {
 		]);
 
 		if (payload.lists.length > 0) {
-			await this.db.batch(
-				payload.lists.map((list) =>
-					this.db
-						.prepare(
-							`INSERT INTO github_lists (user_id, github_list_id, name, description, imported_at)
+			const statements = payload.lists.map((list) =>
+				this.db
+					.prepare(
+						`INSERT INTO github_lists (user_id, github_list_id, name, description, imported_at)
                  VALUES (?, ?, ?, ?, ?)`,
-						)
-						.bind(userId, list.githubListId, list.name, list.description, importedAt),
-				),
+					)
+					.bind(userId, list.githubListId, list.name, list.description, importedAt),
 			);
+			await executeChunkedBatch(this.db, statements);
 		}
 
 		if (payload.stars.length > 0) {
-			await this.db.batch(
-				payload.stars.map((star) =>
-					this.db
-						.prepare(
-							`INSERT INTO starred_repositories (
+			const statements = payload.stars.map((star) =>
+				this.db
+					.prepare(
+						`INSERT INTO starred_repositories (
                   user_id,
                   github_repo_id,
                   full_name,
@@ -439,39 +447,38 @@ export class D1Store {
                   note,
                   imported_at
                 ) VALUES (?, ?, ?, ?, ?, '[]', '', ?)`,
-						)
-						.bind(
-							userId,
-							star.githubRepoId,
-							star.fullName,
-							star.description,
-							star.url,
-							importedAt,
-						),
-				),
+					)
+					.bind(
+						userId,
+						star.githubRepoId,
+						star.fullName,
+						star.description,
+						star.url,
+						importedAt,
+					),
 			);
+			await executeChunkedBatch(this.db, statements);
 		}
 
 		if (payload.memberships.length > 0) {
-			await this.db.batch(
-				payload.memberships.map((membership) =>
-					this.db
-						.prepare(
-							`INSERT INTO github_list_memberships (
+			const statements = payload.memberships.map((membership) =>
+				this.db
+					.prepare(
+						`INSERT INTO github_list_memberships (
                   user_id,
                   github_repo_id,
                   github_list_id,
                   imported_at
                 ) VALUES (?, ?, ?, ?)`,
-						)
-						.bind(
-							userId,
-							membership.githubRepoId,
-							membership.githubListId,
-							importedAt,
-						),
-				),
+					)
+					.bind(
+						userId,
+						membership.githubRepoId,
+						membership.githubListId,
+						importedAt,
+					),
 			);
+			await executeChunkedBatch(this.db, statements);
 		}
 	}
 
@@ -484,27 +491,26 @@ export class D1Store {
 			.run();
 
 		if (assignments.length > 0) {
-			await this.db.batch(
-				assignments.map((assignment) =>
-					this.db
-						.prepare(
-							`INSERT INTO desired_list_assignments (
+			const statements = assignments.map((assignment) =>
+				this.db
+					.prepare(
+						`INSERT INTO desired_list_assignments (
                   user_id,
                   github_repo_id,
                   github_list_id,
                   reason,
                   updated_at
                 ) VALUES (?, ?, ?, ?, ?)`,
-						)
-						.bind(
-							userId,
-							assignment.githubRepoId,
-							assignment.githubListId,
-							assignment.reason,
-							now,
-						),
-				),
+					)
+					.bind(
+						userId,
+						assignment.githubRepoId,
+						assignment.githubListId,
+						assignment.reason,
+						now,
+					),
 			);
+			await executeChunkedBatch(this.db, statements);
 		}
 	}
 
@@ -572,7 +578,7 @@ export class D1Store {
 		];
 
 		if (statements.length > 0) {
-			await this.db.batch(statements);
+			await executeChunkedBatch(this.db, statements);
 		}
 	}
 
@@ -588,7 +594,8 @@ export class D1Store {
             imported_at
          FROM starred_repositories
          WHERE user_id = ?
-         ORDER BY full_name`,
+         ORDER BY full_name
+         LIMIT 5000`,
 			)
 			.bind(userId)
 			.all<{
@@ -605,7 +612,8 @@ export class D1Store {
 				`SELECT github_list_id, name, description
          FROM github_lists
          WHERE user_id = ?
-         ORDER BY name`,
+         ORDER BY name
+         LIMIT 1000`,
 			)
 			.bind(userId)
 			.all<{
@@ -618,7 +626,8 @@ export class D1Store {
 			.prepare(
 				`SELECT github_repo_id, github_list_id
          FROM github_list_memberships
-         WHERE user_id = ?`,
+         WHERE user_id = ?
+         LIMIT 10000`,
 			)
 			.bind(userId)
 			.all<{
@@ -630,7 +639,8 @@ export class D1Store {
 			.prepare(
 				`SELECT github_repo_id, github_list_id, reason
          FROM desired_list_assignments
-         WHERE user_id = ?`,
+         WHERE user_id = ?
+         LIMIT 5000`,
 			)
 			.bind(userId)
 			.all<{
@@ -652,7 +662,8 @@ export class D1Store {
             state
          FROM bulk_action_queue
          WHERE user_id = ?
-         ORDER BY id DESC`,
+         ORDER BY id DESC
+         LIMIT 500`,
 			)
 			.bind(userId)
 			.all<{

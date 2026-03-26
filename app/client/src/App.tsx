@@ -99,6 +99,9 @@ export function App() {
 
 	useEffect(() => {
 		const handler = (event: MessageEvent) => {
+			if (event.origin !== window.location.origin) {
+				return;
+			}
 			if (event.data?.type !== "github-stars-import") {
 				return;
 			}

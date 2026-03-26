@@ -1,86 +1,86 @@
-# Anh-lists
+# ana-lists
 
 [English README](./README-en.md)
 
-GitHub の `Star` と公式 `Lists` をまとめて扱うための Private CRM です。  
-任意の公開リポジトリの stargazer を調べてメモやタグを付けたり、自分の starred repositories / Lists を取り込んで整理計画を作れます。
+A private CRM for GitHub `Stars` and official GitHub `Lists`.
+It lets you explore stargazers for any public repository, keep private notes and tags on people, and import your starred repositories / Lists to plan bulk organization work.
 
-現在のアプリ本体は [`app/`](./app) にあります。
+The current application lives in [`app/`](./app).
 
-## 主な機能
+## Features
 
-- 任意の公開 repo を追跡して stargazer を手動同期
-- stargazer の検索、絞り込み、タグ、メモ、保存状態の管理
-- GitHub stars / Lists のインポート
-- desired state ベースの差分表示
-- bulk queue による List 整理支援
-- Cloudflare Workers + D1 + React/Vite 構成
+- Track any public repository and manually sync stargazers
+- Search and filter stargazers with tags, notes, and saved state
+- Import GitHub stars / Lists into the workspace
+- Compare current GitHub state with a desired state
+- Generate a bulk queue for List organization work
+- Built on Cloudflare Workers + D1 + React/Vite
 
-## 構成
+## Stack
 
-- フロントエンド: React + Vite
+- Frontend: React + Vite
 - API: Cloudflare Workers
-- DB: Cloudflare D1
-- 認証: GitHub OAuth または self-only mode
+- Database: Cloudflare D1
+- Auth: GitHub OAuth or self-only mode
 
-## ローカル起動
+## Local preview
 
-依存のネイティブバイナリ都合で、`npm install` と実行は同じ環境で行ってください。
+Because of native binary dependencies, run `npm install` and the dev commands in the same environment.
 
 ```bash
 cd app
 npm install
-npx wrangler d1 migrations apply your−workers−name --local
+npx wrangler d1 migrations apply github-star-lists-crm --local
 npm run dev
 ```
 
-フロントだけ確認する場合:
+Frontend-only preview:
 
 ```bash
 cd app
 npm run dev:client
 ```
 
-### Windows での起動
+### Running on Windows
 
-`cmd` または PowerShell でそのまま実行できます。
+You can run the project directly from `cmd` or PowerShell.
 
 ```powershell
-cd \app
-npx wrangler d1 migrations apply your−workers−name −−local
+cd C:\dai\GitHub\playground\app
+npx wrangler d1 migrations apply github-star-lists-crm --local
 npm run dev
 ```
 
-フロントだけ確認する場合:
+Frontend-only preview:
 
 ```powershell
-cd \app
+cd C:\dai\GitHub\playground\app
 npm run dev:client
 ```
 
-通常の確認先:
+Typical local URLs:
 
-- Worker API 込み: `http://localhost:8787`
-- フロントのみ: `http://localhost:4173`
+- Full Worker app: `http://localhost:8787`
+- Frontend only: `http://localhost:4173`
 
-## ローカル環境変数
+## Local environment
 
-`app/.dev.vars` を使います。例:
+Use `app/.dev.vars`. Example:
 
 ```env
-SELF_ONLY_GITHUB_LOGIN=your name
+SELF_ONLY_GITHUB_LOGIN=dai
 SESSION_SECRET=replace-me
 APP_ORIGIN=http://localhost:8787
 ```
 
-OAuth を使う場合は以下も追加します。
+Add these for OAuth:
 
 ```env
 GITHUB_CLIENT_ID=...
 GITHUB_CLIENT_SECRET=...
 ```
 
-## Cloudflare への反映
+## Deploy to Cloudflare
 
 ```bash
 cd app
@@ -88,27 +88,42 @@ npm run build
 npx wrangler deploy
 ```
 
-DB migration:
+Run remote D1 migrations:
 
 ```bash
 cd app
-npx wrangler d1 migrations apply your−workers−name  -remote
+npx wrangler d1 migrations apply github-star-lists-crm --remote
 ```
 
-## GitHub OAuth 設定
+## GitHub OAuth settings
 
-GitHub OAuth App の設定値:
+Use these values when creating the GitHub OAuth App:
 
-- Homepage URL: `https://your-workers-name.workers.dev`
-- Authorization callback URL: `https://your-workers-name.workers.dev/api/auth/github/callback`
+- Homepage URL: `https://github-star-lists-crm.dai.workers.dev`
+- Authorization callback URL: `https://github-star-lists-crm.dai.workers.dev/api/auth/github/callback`
 
-Cloudflare 側では `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `SESSION_SECRET` を設定します。
+On Cloudflare, configure `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and `SESSION_SECRET`.
 
-## デプロイ先
+## Deployment
 
-- App URL: [https://your-workers-name.workers.dev](https://your-workers-name.workers.dev)
+- App URL: [https://github-star-lists-crm.dai.workers.dev](https://github-star-lists-crm.dai.workers.dev)
 
-## 補足
+## Notes
 
-- GitHub Lists への直接書き込みは v1 では未対応です
-- import helper は GitHub ページ構造に依存するため、必要に応じて調整が必要です
+- Direct writeback to GitHub Lists is not implemented in v1
+- The import helper depends on GitHub page structure and may need selector updates
+
+## Billing Safety
+
+To prevent unexpected Cloudflare D1 billing, the following limits are enforced:
+
+- **Stargazer sync**: Maximum 5,000 stargazers per repository sync
+- **Profile fetch**: Up to 500 detailed profiles per sync (remainder stored with minimal data)
+- **D1 batch operations**: All batch inserts are chunked to 100 statements per batch
+- **Query limits**: List queries have limits (500-10,000 rows) to prevent unbounded reads
+- **Database indexes**: 9 indexes added to optimize common queries and reduce full table scans
+
+If you need higher limits for personal use, adjust these constants in the source code:
+- `MAX_STARGZERS_PER_SYNC` in `src/server/github.ts`
+- `PROFILE_FETCH_LIMIT` in `src/server/github.ts`
+- `D1_BATCH_CHUNK_SIZE` in `src/server/store.ts`

@@ -430,7 +430,11 @@ function getCookieName(env: AppEnv) {
 }
 
 function getSessionSecret(env: AppEnv) {
-	return env.SESSION_SECRET?.trim() || "local-development-secret";
+	const secret = env.SESSION_SECRET?.trim();
+	if (!secret) {
+		throw new Error("SESSION_SECRET environment variable is required");
+	}
+	return secret;
 }
 
 function isSecureRequest(request: Request) {

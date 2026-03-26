@@ -1,5 +1,8 @@
 import type { StargazerRecord } from "../domain/stargazers";
 
+const MAX_STARGZERS_PER_SYNC = 5000;
+const PROFILE_FETCH_LIMIT = 500;
+
 type GithubUserProfile = {
 	id: number;
 	login: string;
@@ -42,8 +45,9 @@ export async function fetchRepositoryStargazers(
 ): Promise<StargazerRecord[]> {
 	const starEdges: GithubStarEdge[] = [];
 	let page = 1;
+	const maxPages = Math.ceil(MAX_STARGZERS_PER_SYNC / 100);
 
-	while (true) {
+	while (page <= maxPages) {
 		const response = await githubRequest(
 			`https://api.github.com/repos/${fullName}/stargazers?per_page=100&page=${page}`,
 			token,
@@ -57,10 +61,16 @@ export async function fetchRepositoryStargazers(
 		}
 
 		starEdges.push(...payload);
+		if (starEdges.length >= MAX_STARGZERS_PER_SYNC) {
+			break;
+		}
 		page += 1;
 	}
 
-	const profiles = await mapWithConcurrency(starEdges, 8, async (edge) => {
+	const edgesToFetch = starEdges.slice(0, PROFILE_FETCH_LIMIT);
+	const remainingEdges = starEdges.slice(PROFILE_FETCH_LIMIT);
+
+	const profiles = await mapWithConcurrency(edgesToFetch, 8, async (edge) => {
 		const response = await githubRequest(
 			`https://api.github.com/users/${edge.user.login}`,
 			token,
@@ -83,7 +93,22 @@ export async function fetchRepositoryStargazers(
 		} satisfies StargazerRecord;
 	});
 
-	return profiles;
+	const placeholderRecords: StargazerRecord[] = remainingEdges.map((edge) => ({
+		githubUserId: edge.user.id,
+		login: edge.user.login,
+		name: "",
+		bio: "",
+		company: "",
+		followers: 0,
+		publicRepos: 0,
+		starredAt: edge.starred_at,
+		repositoryIds: [],
+		tags: [],
+		saved: false,
+		note: "",
+	}));
+
+	return [...profiles, ...placeholderRecords];
 }
 
 export async function exchangeGithubCodeForSession(code: string, env: {
