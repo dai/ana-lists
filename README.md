@@ -68,7 +68,7 @@ npm run dev:client
 `app/.dev.vars` を使います。例:
 
 ```env
-SELF_ONLY_GITHUB_LOGIN=dai
+SELF_ONLY_GITHUB_LOGIN=your-name
 SESSION_SECRET=replace-me
 APP_ORIGIN=http://localhost:8787
 ```
@@ -99,14 +99,14 @@ npx wrangler d1 migrations apply your-d1-database-name --remote
 
 GitHub OAuth App の設定値:
 
-- Homepage URL: `https://github-star-lists-crm.dai.workers.dev`
-- Authorization callback URL: `https://github-star-lists-crm.dai.workers.dev/api/auth/github/callback`
+- Homepage URL: `https://your-d1-database-name.<name>.workers.dev`
+- Authorization callback URL: `https://your-d1-database-name.<name>.workers.dev/api/auth/github/callback`
 
 Cloudflare 側で `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `SESSION_SECRET` を設定します。
 
 ## デプロイ先
 
-- App URL: [https://github-star-lists-crm.dai.workers.dev](https://github-star-lists-crm.dai.workers.dev)
+- App URL: [https://your-d1-database-name.<name>.workers.dev](https://your-d1-database-name.<name>.workers.dev)
 
 ## 補足
 
