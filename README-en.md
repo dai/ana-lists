@@ -30,7 +30,7 @@ Because of native binary dependencies, run `npm install` and the dev commands in
 ```bash
 cd app
 npm install
-npx wrangler d1 migrations apply github-star-lists-crm --local
+npx wrangler d1 migrations apply your-d1-database-name --local
 npm run dev
 ```
 
@@ -46,15 +46,15 @@ npm run dev:client
 You can run the project directly from `cmd` or PowerShell.
 
 ```powershell
-cd C:\dai\GitHub\playground\app
-npx wrangler d1 migrations apply github-star-lists-crm --local
+cd .\app
+npx wrangler d1 migrations apply your-d1-database-name --local
 npm run dev
 ```
 
 Frontend-only preview:
 
 ```powershell
-cd C:\dai\GitHub\playground\app
+cd .\app
 npm run dev:client
 ```
 
@@ -92,7 +92,7 @@ Run remote D1 migrations:
 
 ```bash
 cd app
-npx wrangler d1 migrations apply github-star-lists-crm --remote
+npx wrangler d1 migrations apply your-d1-database-name --remote
 ```
 
 ## GitHub OAuth settings
