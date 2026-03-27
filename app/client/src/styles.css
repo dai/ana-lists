@@ -554,6 +554,18 @@ a {
 	color: var(--accent-2);
 }
 
+.list-count-badge {
+	margin-left: 10px;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--muted);
+	background: color-mix(in srgb, var(--bg-input) 90%, transparent);
+	padding: 2px 10px;
+	border-radius: 999px;
+	border: 1px solid var(--line);
+	vertical-align: middle;
+}
+
 .list-columns,
 .diff-grid {
 	align-items: stretch;

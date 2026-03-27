@@ -743,7 +743,14 @@ export function App() {
 
 					<div className="panel">
 						<div className="panel-header">
-							<h2 className="section-title">{t.lists.title}</h2>
+							<h2 className="section-title">
+								{t.lists.title}
+								{workspace && (
+									<span className="list-count-badge">
+										{workspace.lists.length} / {dashboard?.listLimit ?? 32}
+									</span>
+								)}
+							</h2>
 							<p>{t.lists.description}</p>
 						</div>
 

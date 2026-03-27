@@ -102,7 +102,7 @@ type CopyShape = {
 		recomputeQueue: string;
 		lastImport: string;
 		never: string;
-		officialLists: string;
+		listCount: string;
 		importEmpty: string;
 		desiredStateEditor: string;
 		noDescription: string;
@@ -214,9 +214,9 @@ export const copy: Record<Language, CopyShape> = {
 			connectGithub: "GitHub Auth",
 			selfOnlyHint:
 				"Set SELF_ONLY_GITHUB_LOGIN for self-only mode or configure GitHub OAuth env vars.",
-			copyBookmarklet: "Copy import bookmarklet",
+			copyBookmarklet: "Bookmarklet",
 			helper:
-				"Open your app first, then run the bookmarklet on GitHub's stars page or a GitHub List page. The helper sends a best-effort payload into this workspace.",
+				"GitHub の stars ページまたは List ページでブックマークレットを実行してください。",
 			importPlaceholder: "Paste import JSON here if you want a manual fallback.",
 			importAction: "Import pasted JSON",
 		},
@@ -253,7 +253,7 @@ export const copy: Record<Language, CopyShape> = {
 			recomputeQueue: "Recalculate",
 			lastImport: "Imported",
 			never: "never",
-			officialLists: "Official Lists",
+			listCount: "Lists",
 			importEmpty: "Import GitHub Lists to populate this workspace.",
 			desiredStateEditor: "Desired state editor",
 			noDescription: "No description",
@@ -363,9 +363,9 @@ export const copy: Record<Language, CopyShape> = {
 			connectGithub: "GitHub Auth",
 			selfOnlyHint:
 				"self-only mode を使うなら SELF_ONLY_GITHUB_LOGIN を設定し、OAuth を使うなら GitHub の環境変数を設定してください。",
-			copyBookmarklet: "import bookmarklet をコピー",
+			copyBookmarklet: "ブックマークレット",
 			helper:
-				"先にアプリを開き、その後 GitHub の stars ページか List ページで bookmarklet を実行してください。見えている内容を best-effort で取り込みます。",
+				"GitHub の stars ページまたは List ページでブックマークレットを実行してください。",
 			importPlaceholder: "手動 fallback 用に import JSON を貼り付けます。",
 			importAction: "貼り付け JSON を取り込む",
 		},
@@ -401,7 +401,7 @@ export const copy: Record<Language, CopyShape> = {
 			recomputeQueue: "再計算",
 			lastImport: "インポート",
 			never: "なし",
-			officialLists: "公式 Lists",
+			listCount: "Lists",
 			importEmpty: "GitHub Lists を import するとここに表示されます。",
 			desiredStateEditor: "desired state editor",
 			noDescription: "説明なし",
