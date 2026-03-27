@@ -446,15 +446,19 @@ function resolveAppOrigin(request: Request, env: AppEnv) {
 }
 
 function buildImportHelper(appOrigin: string) {
+	// Auto-detect page type: ?tab=lists (list-of-lists page) vs /stars/dai/lists/NAME (individual list)
 	const js = `javascript:(async()=>{try{` +
 		`const appOrigin=${JSON.stringify(appOrigin)};` +
 		`const pageOrigin=(typeof location!=="undefined"&&location.protocol)?location.protocol+"//"+location.host:"";` +
-		`const anchors=document.querySelectorAll("#user-list-repositories h2 a");` +
+		`const hasRepoContainer=!!document.querySelector("#user-list-repositories h2 a");` +
+		`const hasListsContainer=!!document.querySelector("#profile-lists-container h3.f4");` +
+		`let stars=[],lists=[];` +
+		`if(hasRepoContainer){` +
 		`const h1=document.querySelector("h1");` +
 		`const currentList=h1?h1.textContent.trim():"";` +
-		`const listId=currentList?currentList.toLowerCase().replace(/[^a-z0-9]+/g,"-"):"";` +
-		`const listDef=listId?{githubListId:listId,name:currentList,description:"Imported from GitHub page"}:null;` +
-		`const repos=[];` +
+		`const listId=currentList.toLowerCase().replace(/[^a-z0-9]+/g,"-");` +
+		`const listDef={githubListId:listId,name:currentList,description:"Imported from GitHub page"};` +
+		`const anchors=document.querySelectorAll("#user-list-repositories h2 a");` +
 		`const seen=new Set();` +
 		`for(const anchor of anchors){` +
 		`const href=anchor.getAttribute("href")||"";` +
@@ -469,14 +473,30 @@ function buildImportHelper(appOrigin: string) {
 		`const descEl=container?container.nextElementSibling:null;` +
 		`const description=descEl&&descEl.tagName==="P"?descEl.textContent.trim():"";` +
 		`const githubRepoId=Math.abs(fullName.split("").reduce((a,c)=>a+c.charCodeAt(0),0));` +
-		`const lists=listDef?[listDef]:[];` +
-		`repos.push({githubRepoId,fullName,description,url:pageOrigin+href,lists})` +
+		`stars.push({githubRepoId,fullName,description,url:pageOrigin+href,lists:[listDef]})` +
 		`}` +
-		`const lists=listDef?[listDef]:[];` +
-		`const payload={exportedAt:new Date().toISOString(),stars:repos,lists};` +
+		`lists=[listDef];` +
+		`console.log("List page:",currentList,"-",stars.length,"repos")` +
+		`}else if(hasListsContainer){` +
+		`const h3s=document.querySelectorAll("#profile-lists-container h3.f4");` +
+		`for(const h3 of h3s){` +
+		`const name=h3.textContent.trim();` +
+		`const anchor=h3.closest("a");` +
+		`const href=anchor?anchor.getAttribute("href"):"";` +
+		`const listId=href?href.split("/").filter(Boolean).pop()||name.toLowerCase().replace(/[^a-z0-9]+/g,"-"):name.toLowerCase().replace(/[^a-z0-9]+/g,"-");` +
+		`const row=anchor?anchor.closest(".Box-row"):null;` +
+		`const descEl=row?row.querySelector(".wb-break-word"):null;` +
+		`const description=descEl?descEl.textContent.trim():"";` +
+		`lists.push({githubListId:listId,name,description})` +
+		`}` +
+		`console.log("Lists page:",lists.length,"lists")` +
+		`}else{` +
+		`alert("Unknown page. Run this on a GitHub Stars page or Lists page (?tab=lists).");return` +
+		`}` +
+		`const payload={exportedAt:new Date().toISOString(),stars,lists};` +
 		`const popup=window.open(appOrigin,"gslcrm-import");` +
 		`if(!popup){alert("Popup blocked. Allow popups for this site and try again.");return};` +
-		`const send=()=>{try{console.log("Sending",repos.length,"repos",lists.length,"lists to",appOrigin);popup.postMessage({type:"github-stars-import",payload},"*")}catch(e){console.error("postMessage failed:",e)}};` +
+		`const send=()=>{try{console.log("Sending",stars.length,"repos",lists.length,"lists to",appOrigin);popup.postMessage({type:"github-stars-import",payload},"*")}catch(e){console.error("postMessage failed:",e)}};` +
 		`send();setTimeout(send,1000);setTimeout(send,2000)` +
 		`}catch(e){console.error("Bookmarklet error:",e);alert("Error:"+e.message)}})();`;
 	return js;
