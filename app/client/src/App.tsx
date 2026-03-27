@@ -110,11 +110,13 @@ export function App() {
 
 	useEffect(() => {
 		const handler = (event: MessageEvent) => {
+			console.log("[postMessage] raw event:", event.data?.type, event.data);
 			// Allow from any origin since bookmarklet runs on github.com but sends to our app
 			if (event.data?.type !== "github-stars-import") {
 				return;
 			}
 			const payload = event.data?.payload;
+			console.log("[postMessage] payload:", payload);
 			if (!payload || !Array.isArray(payload.stars)) {
 				console.error("[postMessage] invalid payload:", payload);
 				return;
