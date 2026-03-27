@@ -1,31 +1,93 @@
 # ana-lists
 
-[Japanese README](./README.md)
+[日本語 README](./README.md)
 
-A private CRM for GitHub `Stars` and official GitHub `Lists`.
-It lets you explore stargazers for any public repository, keep private notes and tags on people, and import your starred repositories / Lists to plan bulk organization work.
+ana-lists is a personal CRM tool for organizing and managing GitHub **Stars** and official **Lists** in one place.
 
-The current application lives in [`app/`](./app).
+You can inspect and save stargazers of public repositories, attach tags and notes to individual users, and import your own starred repositories / Lists to plan and manage your organization workflow.  
+It also helps you compare the current state on GitHub with your desired state before you reorganize things.
+
+The app runs on Cloudflare Workers + D1 and supports either **GitHub OAuth** or **self-only mode**.
+
+The main application lives in [`app/`](./app).
 
 ## Features
 
-- Track any public repository and manually sync stargazers
-- Search and filter stargazers with tags, notes, and saved state
-- Import GitHub stars / Lists into the workspace
-- Compare current GitHub state with a desired state
-- Generate a bulk queue for List organization work
-- Built on Cloudflare Workers + D1 + React/Vite
+- Track any public repository and manually sync its stargazers
+- Search and filter stargazers
+- Manage per-user tags, notes, and saved state
+- Import GitHub stars / Lists
+- Compare current GitHub state with desired state
+- Organize Lists with a bulk queue workflow
 
-## Stack
+## Good fit for
+
+- People whose GitHub Stars have grown too large to manage comfortably
+- Reviewing who starred a repository later
+- Tracking interesting GitHub users with notes and tags
+- Planning GitHub Lists organization before doing manual cleanup
+- Building a lightweight personal GitHub CRM
+
+## Not supported yet / Limitations
+
+- Direct write-back to GitHub Lists is **not supported** in v1
+- The import helper depends on GitHub page structure, so selectors may need adjustments if GitHub changes the UI
+
+## Tech stack
 
 - Frontend: React + Vite
 - API: Cloudflare Workers
 - Database: Cloudflare D1
 - Auth: GitHub OAuth or self-only mode
 
-## Local preview
+## Quick start
 
-Because of native binary dependencies, run `npm install` and the dev commands in the same environment.
+This is the fastest way to run it locally.
+
+### 1. Create `app/.dev.vars`
+
+```env
+SELF_ONLY_GITHUB_LOGIN=(your-github)username
+SESSION_SECRET=replace-me
+APP_ORIGIN=http://localhost:8787
+```
+
+If you want to use GitHub OAuth, also add:
+
+```env
+GITHUB_CLIENT_ID=...
+GITHUB_CLIENT_SECRET=...
+```
+
+### 2. Install dependencies
+
+Because some dependencies include native binaries, run `npm install` and the app in the **same environment**.
+
+```bash
+cd app
+npm install
+```
+
+### 3. Apply local D1 migrations
+
+```bash
+npx wrangler d1 migrations apply your-d1-database-name --local
+```
+
+### 4. Start the dev server
+
+```bash
+npm run dev
+```
+
+### 5. Open it in your browser
+
+- With Worker API: `http://localhost:8787`
+- Frontend only: `http://localhost:4173`
+
+## Local development
+
+### Run the full app
 
 ```bash
 cd app
@@ -34,53 +96,53 @@ npx wrangler d1 migrations apply your-d1-database-name --local
 npm run dev
 ```
 
-Frontend-only preview:
+### Run frontend only
 
 ```bash
 cd app
 npm run dev:client
 ```
 
-### Running on Windows
+## Running on Windows
 
-You can run the project directly from `cmd` or PowerShell.
+You can run the commands directly in `cmd` or PowerShell.
+
+### Run the full app
 
 ```powershell
 cd .\app
+npm install
 npx wrangler d1 migrations apply your-d1-database-name --local
 npm run dev
 ```
 
-Frontend-only preview:
+### Run frontend only
 
 ```powershell
 cd .\app
 npm run dev:client
 ```
 
-Typical local URLs:
+## Local environment variables
 
-- Full Worker app: `http://localhost:8787`
-- Frontend only: `http://localhost:4173`
+For local development, use `app/.dev.vars`.
 
-## Local environment
-
-Use `app/.dev.vars`. Example:
+Example:
 
 ```env
-SELF_ONLY_GITHUB_LOGIN=dai
+SELF_ONLY_GITHUB_LOGIN=(your-github)username
 SESSION_SECRET=replace-me
 APP_ORIGIN=http://localhost:8787
 ```
 
-Add these for OAuth:
+If using OAuth, also configure:
 
 ```env
 GITHUB_CLIENT_ID=...
 GITHUB_CLIENT_SECRET=...
 ```
 
-## Deploy to Cloudflare
+## Deploying to Cloudflare
 
 ```bash
 cd app
@@ -88,42 +150,54 @@ npm run build
 npx wrangler deploy
 ```
 
-Run remote D1 migrations:
+Apply remote D1 migrations:
 
 ```bash
 cd app
 npx wrangler d1 migrations apply your-d1-database-name --remote
 ```
 
-## GitHub OAuth settings
+## GitHub OAuth setup
 
-Use these values when creating the GitHub OAuth App:
+Example values for a GitHub OAuth App:
 
-- Homepage URL: `https://github-star-lists-crm.dai.workers.dev`
-- Authorization callback URL: `https://github-star-lists-crm.dai.workers.dev/api/auth/github/callback`
+- Homepage URL: `https://your-d1-database-name.<name>.workers.dev`
+- Authorization callback URL: `https://your-d1-database-name.<name>.workers.dev/api/auth/github/callback`
 
-On Cloudflare, configure `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and `SESSION_SECRET`.
+On the Cloudflare side, configure:
 
-## Deployment
+- `GITHUB_CLIENT_ID`
+- `GITHUB_CLIENT_SECRET`
+- `SESSION_SECRET`
 
-- App URL: [https://github-star-lists-crm.dai.workers.dev](https://github-star-lists-crm.dai.workers.dev)
+## Deployment URL
 
-## Notes
+- App URL: [https://your-d1-database-name.<name>.workers.dev](https://your-d1-database-name.<name>.workers.dev)
 
-- Direct writeback to GitHub Lists is not implemented in v1
-- The import helper depends on GitHub page structure and may need selector updates
+## Glossary
 
-## Billing Safety
+- **stargazer**: a GitHub user who starred a target repository
+- **Lists**: GitHub’s official list feature
+- **desired state**: the final organization state you want to reach
+- **bulk queue**: a queue used to process and organize items in batches
 
-To prevent unexpected Cloudflare D1 billing, the following limits are enforced:
+## Cost control
 
-- **Stargazer sync**: Maximum 5,000 stargazers per repository sync
-- **Profile fetch**: Up to 500 detailed profiles per sync (remainder stored with minimal data)
-- **D1 batch operations**: All batch inserts are chunked to 100 statements per batch
-- **Query limits**: List queries have limits (500-10,000 rows) to prevent unbounded reads
-- **Database indexes**: 9 indexes added to optimize common queries and reduce full table scans
+To avoid unexpected Cloudflare D1 charges, the app includes the following limits:
 
-If you need higher limits for personal use, adjust these constants in the source code:
+- **Stargazer sync**: up to 5,000 users per repository
+- **Profile fetch**: fetch detailed profiles for up to 500 users during sync (the rest are stored with minimal data)
+- **D1 batch operations**: inserts are split into chunks of 100 statements
+- **Query limits**: list queries are capped between 500 and 10,000 rows to avoid unbounded reads
+- **Database indexes**: 9 indexes are added to reduce full table scans
+
+If you want to raise the limits for personal use, adjust these constants:
+
 - `MAX_STARGZERS_PER_SYNC` in `src/server/github.ts`
 - `PROFILE_FETCH_LIMIT` in `src/server/github.ts`
 - `D1_BATCH_CHUNK_SIZE` in `src/server/store.ts`
+
+## Notes
+
+- This project is designed for personal workflows around GitHub Stars / Lists organization
+- It is especially useful for investigating stargazers of public repositories and keeping personal notes / tags for later review
