@@ -6,9 +6,11 @@
 	"scripts": {
 		"build": "vite build",
 		"deploy": "npm run build && wrangler deploy",
-		"dev": "wrangler dev",
+		"dev": "npm run build && wrangler dev",
+		"dev:live": "concurrently -k -n build,worker \"npm:dev:watch\" \"wrangler dev\"",
+		"dev:watch": "vite build --watch",
 		"dev:client": "vite",
-		"start": "wrangler dev",
+		"start": "npm run build && wrangler dev",
 		"test": "vitest",
 		"test:run": "vitest --run",
 		"typecheck": "tsc --noEmit",
@@ -25,9 +27,11 @@
 		"@types/react": "^19.2.2",
 		"@types/react-dom": "^19.2.2",
 		"@vitejs/plugin-react": "^6.0.1",
+		"concurrently": "^9.2.1",
+		"jsdom": "^29.0.1",
 		"typescript": "^5.5.2",
 		"vite": "^8.0.2",
 		"vitest": "~3.2.0",
-		"wrangler": "^3.101.0"
+		"wrangler": "^4.77.0"
 	}
 }

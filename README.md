@@ -71,13 +71,21 @@ npm install
 ### 3. D1 のローカルマイグレーションを適用
 
 ```bash
-npx wrangler d1 migrations apply your-d1-database-name --local
+npx wrangler d1 migrations apply github-star-lists-crm --local
 ```
 
 ### 4. 開発サーバーを起動
 
 ```bash
 npm run dev
+```
+
+`npm run dev` は起動前にフロントエンドを一度 build してから `wrangler dev` を起動します。
+
+フロントエンドの変更を継続的に反映したい場合は、以下を使ってください。
+
+```bash
+npm run dev:live
 ```
 
 ### 5. ブラウザで確認
@@ -92,9 +100,11 @@ npm run dev
 ```bash
 cd app
 npm install
-npx wrangler d1 migrations apply your-d1-database-name --local
+npx wrangler d1 migrations apply github-star-lists-crm --local
 npm run dev
 ```
+
+変更を即時反映したい場合は `npm run dev:live` を使ってください。
 
 ### フロントエンドだけ確認する場合
 
@@ -112,8 +122,14 @@ npm run dev:client
 ```powershell
 cd .\app
 npm install
-npx wrangler d1 migrations apply your-d1-database-name --local
+npx wrangler d1 migrations apply github-star-lists-crm --local
 npm run dev
+```
+
+フロントエンド変更を継続反映したい場合は、以下を使います。
+
+```powershell
+npm run dev:live
 ```
 
 ### フロントエンドだけ確認する場合
@@ -142,6 +158,20 @@ GITHUB_CLIENT_ID=...
 GITHUB_CLIENT_SECRET=...
 ```
 
+## Codex ローカル権限メモ
+
+Codex 用のローカル権限補足設定は [`./.codex/settings.local.json`](./.codex/settings.local.json) にあります。
+
+現時点で許可済みとして扱うのは次の Bash コマンドだけです。
+
+- `git pull:*`
+- `gh repo:*`
+
+注意:
+
+- `gh pr`、`gh issue`、`gh run` など `gh repo` 以外の系統は、この設定だけでは許可済みとみなしません
+- PowerShell 経由の別コマンドや、ここに書かれていない操作は対象外です
+
 ## Cloudflare へのデプロイ
 
 ```bash
@@ -149,6 +179,24 @@ cd app
 npm run build
 npx wrangler deploy
 ```
+
+GitHub Actions では、`app/**` への push で build / test / typecheck が走ります。
+さらに `main` ブランチへの push で、以下の GitHub Secrets が設定されていれば Cloudflare Workers へ自動 deploy します。
+
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+設定手順:
+
+1. Cloudflare Dashboard の `My Profile` → `API Tokens` で token を作成
+2. テンプレートは `Edit Cloudflare Workers` を使う
+3. Account ID は Cloudflare Dashboard のアカウント概要から取得する
+4. GitHub の `Settings` → `Secrets and variables` → `Actions` に以下を追加する
+
+   - `CLOUDFLARE_API_TOKEN`: 上で作成した token
+   - `CLOUDFLARE_ACCOUNT_ID`: Cloudflare の Account ID
+
+この設定が入ると、`main` への push で `.github/workflows/cloudflare-build.yml` の deploy job が有効になります。
 
 リモート D1 マイグレーション:
 

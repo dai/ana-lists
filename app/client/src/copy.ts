@@ -5,6 +5,12 @@ type CopyShape = {
 		language: string;
 		theme: string;
 		logout: string;
+		profile: string;
+		settings: string;
+		dashboard: string;
+		githubProfile: string;
+		githubAuth: string;
+		openUserMenu: string;
 	};
 	languageOptions: Record<Language, string>;
 	themeOptions: Record<Theme, string>;
@@ -18,6 +24,29 @@ type CopyShape = {
 		user: string;
 		listLimit: string;
 		anonymous: string;
+	};
+	profilePage: {
+		title: string;
+		description: string;
+		name: string;
+		login: string;
+		authMode: string;
+		githubProfile: string;
+		signedOut: string;
+		authModeLabels: {
+			anonymous: string;
+			session: string;
+			selfOnly: string;
+		};
+	};
+	settingsPage: {
+		title: string;
+		description: string;
+		appearance: string;
+		auth: string;
+		signedInAs: string;
+		signedOut: string;
+		authHint: string;
 	};
 	trackedRepos: {
 		title: string;
@@ -117,6 +146,12 @@ export const copy: Record<Language, CopyShape> = {
 			language: "Language",
 			theme: "Theme",
 			logout: "Log out",
+			profile: "Profile",
+			settings: "Settings",
+			dashboard: "Back to dashboard",
+			githubProfile: "GitHub profile",
+			githubAuth: "GitHub Auth",
+			openUserMenu: "Open user menu",
 		},
 		languageOptions: {
 			en: "EN",
@@ -128,15 +163,37 @@ export const copy: Record<Language, CopyShape> = {
 		},
 		hero: {
 			eyebrow: "Private CRM for GitHub signals",
-			title: "Track stargazers, map your GitHub Lists, and plan bulk cleanup.",
-			description:
-				"The app stores your research privately, lets you sync stargazers on demand, and builds a reviewable desired-state queue for official GitHub Lists.",
+			title: "Ana-Lists",
+			description: "Manage and analyze your GitHub Lists.",
 		},
 		statusCard: {
 			status: "Status",
 			user: "User",
 			listLimit: "List limit",
 			anonymous: "Anonymous",
+		},
+		profilePage: {
+			title: "Profile",
+			description: "Review the current GitHub identity tied to this workspace and jump to the public profile when needed.",
+			name: "Name",
+			login: "Login",
+			authMode: "Auth mode",
+			githubProfile: "Open GitHub profile",
+			signedOut: "Sign in with GitHub to view the linked profile details here.",
+			authModeLabels: {
+				anonymous: "Anonymous",
+				session: "GitHub session",
+				selfOnly: "Self-only mode",
+			},
+		},
+		settingsPage: {
+			title: "Settings",
+			description: "Keep the interface compact and adjust the workspace appearance from one place.",
+			appearance: "Appearance",
+			auth: "Authentication",
+			signedInAs: "Signed in as",
+			signedOut: "Not signed in",
+			authHint: "GitHub OAuth is unavailable. Self-only mode guidance remains below.",
 		},
 		trackedRepos: {
 			title: "Tracked Repos",
@@ -154,7 +211,7 @@ export const copy: Record<Language, CopyShape> = {
 			description:
 				"Self-only mode works immediately. OAuth is available when GitHub credentials are configured.",
 			signedInAs: "Signed in as",
-			connectGithub: "Connect GitHub",
+			connectGithub: "GitHub Auth",
 			selfOnlyHint:
 				"Set SELF_ONLY_GITHUB_LOGIN for self-only mode or configure GitHub OAuth env vars.",
 			copyBookmarklet: "Copy import bookmarklet",
@@ -239,6 +296,12 @@ export const copy: Record<Language, CopyShape> = {
 			language: "言語",
 			theme: "表示",
 			logout: "ログアウト",
+			profile: "プロフィール",
+			settings: "設定",
+			dashboard: "ダッシュボードへ戻る",
+			githubProfile: "GitHubプロフィール",
+			githubAuth: "GitHub Auth",
+			openUserMenu: "ユーザーメニューを開く",
 		},
 		languageOptions: {
 			en: "EN",
@@ -250,15 +313,37 @@ export const copy: Record<Language, CopyShape> = {
 		},
 		hero: {
 			eyebrow: "GitHub シグナルのための Private CRM",
-			title: "stargazer を追跡し、GitHub Lists を整理して、まとめて片付ける計画を作る。",
-			description:
-				"このアプリは調査メモを非公開で保持し、stargazer を手動同期し、公式 GitHub Lists 向けの desired-state queue を作ります。",
+			title: "Ana-Lists",
+			description: "GitHub Lists を整理し、分析する。",
 		},
 		statusCard: {
 			status: "状態",
 			user: "ユーザー",
 			listLimit: "List 上限",
 			anonymous: "未ログイン",
+		},
+		profilePage: {
+			title: "プロフィール",
+			description: "このワークスペースに紐づく GitHub アカウント情報を確認し、必要なら公開プロフィールへ移動できます。",
+			name: "表示名",
+			login: "Login",
+			authMode: "認証方式",
+			githubProfile: "GitHubプロフィールを開く",
+			signedOut: "GitHub でログインすると、ここに紐づくプロフィール情報を表示します。",
+			authModeLabels: {
+				anonymous: "未ログイン",
+				session: "GitHub セッション",
+				selfOnly: "self-only mode",
+			},
+		},
+		settingsPage: {
+			title: "設定",
+			description: "一覧性を保ちながら、表示設定と認証導線をここでまとめて管理します。",
+			appearance: "表示設定",
+			auth: "認証",
+			signedInAs: "ログイン中",
+			signedOut: "未ログイン",
+			authHint: "GitHub OAuth は未設定です。self-only mode の案内を下に表示します。",
 		},
 		trackedRepos: {
 			title: "追跡中リポジトリ",
@@ -276,7 +361,7 @@ export const copy: Record<Language, CopyShape> = {
 			description:
 				"self-only mode ですぐ使えます。GitHub 認証情報があれば OAuth も有効です。",
 			signedInAs: "ログイン中",
-			connectGithub: "GitHub に接続",
+			connectGithub: "GitHub Auth",
 			selfOnlyHint:
 				"self-only mode を使うなら SELF_ONLY_GITHUB_LOGIN を設定し、OAuth を使うなら GitHub の環境変数を設定してください。",
 			copyBookmarklet: "import bookmarklet をコピー",

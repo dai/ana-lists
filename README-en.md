@@ -71,13 +71,21 @@ npm install
 ### 3. Apply local D1 migrations
 
 ```bash
-npx wrangler d1 migrations apply your-d1-database-name --local
+npx wrangler d1 migrations apply github-star-lists-crm --local
 ```
 
 ### 4. Start the dev server
 
 ```bash
 npm run dev
+```
+
+`npm run dev` builds the frontend once before starting `wrangler dev`.
+
+If you want frontend changes to keep showing up while you edit, use:
+
+```bash
+npm run dev:live
 ```
 
 ### 5. Open it in your browser
@@ -92,9 +100,11 @@ npm run dev
 ```bash
 cd app
 npm install
-npx wrangler d1 migrations apply your-d1-database-name --local
+npx wrangler d1 migrations apply github-star-lists-crm --local
 npm run dev
 ```
+
+For continuous frontend rebuilds while the Worker is running, use `npm run dev:live`.
 
 ### Run frontend only
 
@@ -112,8 +122,14 @@ You can run the commands directly in `cmd` or PowerShell.
 ```powershell
 cd .\app
 npm install
-npx wrangler d1 migrations apply your-d1-database-name --local
+npx wrangler d1 migrations apply github-star-lists-crm --local
 npm run dev
+```
+
+For continuous frontend rebuilds while testing locally, use:
+
+```powershell
+npm run dev:live
 ```
 
 ### Run frontend only
@@ -142,6 +158,20 @@ GITHUB_CLIENT_ID=...
 GITHUB_CLIENT_SECRET=...
 ```
 
+## Codex local permissions note
+
+The local Codex permission override lives in [`./.codex/settings.local.json`](./.codex/settings.local.json).
+
+At the moment, only these Bash command families should be treated as pre-approved:
+
+- `git pull:*`
+- `gh repo:*`
+
+Notes:
+
+- `gh pr`, `gh issue`, `gh run`, and other `gh` namespaces are not implied by this setting
+- PowerShell commands and any operation not listed here remain out of scope for this override
+
 ## Deploying to Cloudflare
 
 ```bash
@@ -149,6 +179,24 @@ cd app
 npm run build
 npx wrangler deploy
 ```
+
+In GitHub Actions, pushes touching `app/**` run typecheck, tests, and build.
+Pushes to `main` also deploy to Cloudflare Workers when these GitHub Secrets are configured:
+
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+Setup steps:
+
+1. In the Cloudflare Dashboard, open `My Profile` -> `API Tokens`
+2. Create a token using the `Edit Cloudflare Workers` template
+3. Copy your Account ID from the Cloudflare account overview
+4. In GitHub, open `Settings` -> `Secrets and variables` -> `Actions` and add:
+
+   - `CLOUDFLARE_API_TOKEN`: the token created above
+   - `CLOUDFLARE_ACCOUNT_ID`: your Cloudflare Account ID
+
+Once those are set, pushes to `main` will activate the deploy job in `.github/workflows/cloudflare-build.yml`.
 
 Apply remote D1 migrations:
 

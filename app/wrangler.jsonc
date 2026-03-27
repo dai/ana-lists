@@ -22,7 +22,7 @@
     }
   ],
   "vars": {
-    "APP_NAME": "GitHub Star / Lists CRM",
+    "APP_NAME": "Ana-Lists",
     "APP_ORIGIN": "https://al.osada.us",
     "LIST_LIMIT": "32",
     "SELF_ONLY_GITHUB_LOGIN": "",

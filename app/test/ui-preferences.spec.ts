@@ -41,6 +41,9 @@ describe("copy", () => {
 		for (const language of languages) {
 			expect(copy[language].controls.language).toBeTruthy();
 			expect(copy[language].controls.theme).toBeTruthy();
+			expect(copy[language].controls.profile).toBeTruthy();
+			expect(copy[language].controls.settings).toBeTruthy();
+			expect(copy[language].controls.githubAuth).toBeTruthy();
 			for (const theme of themes) {
 				expect(copy[language].themeOptions[theme]).toBeTruthy();
 			}
