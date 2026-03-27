@@ -464,15 +464,18 @@ function buildImportHelper(appOrigin: string) {
 		`const container=anchor.closest(".d-inline-block");` +
 		`const descEl=container?container.nextElementSibling:null;` +
 		`const description=descEl&&descEl.tagName==="P"?descEl.textContent.trim():"";` +
-		`repos.push({githubRepoId:Math.abs(fullName.split("").reduce((a,c)=>a+c.charCodeAt(0),0)),fullName,description,url:pageOrigin+href,lists:[]})` +
+		`repos.push({githubRepoId:Math.abs(fullName.split("").reduce((a,c)=>a+c.charCodeAt(0),0)),fullName,description,url:pageOrigin+href})` +
 		`}` +
 		`const h1=document.querySelector("h1");` +
 		`const currentList=h1?h1.textContent.trim():"";` +
-		`const lists=currentList?[{githubListId:currentList.toLowerCase().replace(/[^a-z0-9]+/g,"-"),name:currentList,description:"Imported from GitHub page"}]:[];` +
-		`const payload={exportedAt:new Date().toISOString(),stars:repos,lists};` +
+		`const listId=currentList?currentList.toLowerCase().replace(/[^a-z0-9]+/g,"-"):"";` +
+		`const lists=currentList&&listId?[{githubListId:listId,name:currentList,description:"Imported from GitHub page"}]:[];` +
+		`const memberships=[];` +
+		`if(listId){for(const repo of repos){memberships.push({githubRepoId:repo.githubRepoId,githubListId:listId})}}` +
+		`const payload={exportedAt:new Date().toISOString(),stars:repos,lists,memberships};` +
 		`const popup=window.open(appOrigin,"gslcrm-import");` +
 		`if(!popup){alert("Popup blocked. Allow popups for this site and try again.");return};` +
-		`const send=()=>{try{console.log("Sending",repos.length,"repos to",appOrigin,payload);popup.postMessage({type:"github-stars-import",payload},"*")}catch(e){console.error("postMessage failed:",e)}};` +
+		`const send=()=>{try{console.log("Sending",repos.length,"repos",lists.length,"lists",memberships.length,"memberships to",appOrigin);popup.postMessage({type:"github-stars-import",payload},"*")}catch(e){console.error("postMessage failed:",e)}};` +
 		`send();setTimeout(send,1000);setTimeout(send,2000)` +
 		`}catch(e){console.error("Bookmarklet error:",e);alert("Error:"+e.message)}})();`;
 	return js;
