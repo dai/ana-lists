@@ -245,7 +245,9 @@ Cloudflare D1 の予期せぬ課金を防ぐため、以下の制限を設けて
 - `src/server/github.ts` の `PROFILE_FETCH_LIMIT`
 - `src/server/store.ts` の `D1_BATCH_CHUNK_SIZE`
 
+
+
 ## 補足
 
-- このプロジェクトは、GitHub の Stars / Lists を自分用に整理したいケースを想定しています
-- 公開リポジトリの stargazer 調査や、あとで見返すためのタグ付け・メモ用途に向いています
+- このプロジェクトは、GitHub の Stars / Lists を自分用に整理したいケースを想定しています 。
+- 公開リポジトリの stargazer 調査や、あとで見返すためのタグ付け・メモ用途に向いています。
