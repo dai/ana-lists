@@ -120,7 +120,28 @@ export async function exchangeGithubCodeForSession(code: string, env: {
 		throw new Error("GitHub OAuth is not configured");
 	}
 
-	const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
+	async function fetchWithRetry(
+		url: string,
+		init: RequestInit,
+		retries = 0,
+	): Promise<Response> {
+		const response = await fetch(url, init);
+		if (response.ok || retries >= MAX_RETRIES) {
+			return response;
+		}
+		if (response.status === 429) {
+			const retryAfter = response.headers.get("Retry-After");
+			let waitMs = 1000;
+			if (retryAfter) {
+				waitMs = Math.min(parseInt(retryAfter, 10) * 1000, 60_000);
+			}
+			await sleep(waitMs);
+			return fetchWithRetry(url, init, retries + 1);
+		}
+		return response;
+	}
+
+	const tokenResponse = await fetchWithRetry("https://github.com/login/oauth/access_token", {
 		method: "POST",
 		headers: {
 			Accept: "application/json",
@@ -167,21 +188,54 @@ export async function exchangeGithubCodeForSession(code: string, env: {
 	};
 }
 
-function githubRequest(url: string, token?: string, accept = "application/json") {
-	return fetch(url, {
+const MAX_RETRIES = 3;
+
+async function githubRequestWithRetry(
+	url: string,
+	token?: string,
+	accept = "application/json",
+	retries = 0,
+): Promise<Response> {
+	const response = await fetch(url, {
 		headers: {
 			Accept: accept,
 			"User-Agent": "github-star-lists-crm",
 			...(token ? { Authorization: `Bearer ${token}` } : {}),
 			"X-GitHub-Api-Version": "2022-11-28",
 		},
-	}).then((response) => {
-		if (!response.ok) {
-			throw new Error(`GitHub request failed (${response.status}) for ${url}`);
+	});
+
+	if (response.ok) {
+		return response;
+	}
+
+	if (response.status === 429 && retries < MAX_RETRIES) {
+		const retryAfter = response.headers.get("Retry-After");
+		const resetAt = response.headers.get("X-RateLimit-Reset");
+
+		let waitMs = 1000; // base 1 second
+		if (retryAfter) {
+			waitMs = parseInt(retryAfter, 10) * 1000;
+		} else if (resetAt) {
+			const resetMs = parseInt(resetAt, 10) * 1000;
+			waitMs = Math.max(resetMs - Date.now(), 1000);
 		}
 
-		return response;
-	});
+		// Cap at 60 seconds to avoid excessive waits
+		waitMs = Math.min(waitMs, 60_000);
+		await sleep(waitMs);
+		return githubRequestWithRetry(url, token, accept, retries + 1);
+	}
+
+	throw new Error(`GitHub request failed (${response.status}) for ${url}`);
+}
+
+function githubRequest(url: string, token?: string, accept = "application/json") {
+	return githubRequestWithRetry(url, token, accept);
+}
+
+function sleep(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function mapWithConcurrency<T, R>(
