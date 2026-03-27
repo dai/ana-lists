@@ -109,19 +109,23 @@ export function App() {
 
 	useEffect(() => {
 		const handler = (event: MessageEvent) => {
-			if (event.origin !== window.location.origin) {
-				return;
-			}
+			// Allow from any origin since bookmarklet runs on github.com but sends to our app
 			if (event.data?.type !== "github-stars-import") {
 				return;
 			}
+			const payload = event.data?.payload;
+			if (!payload || !Array.isArray(payload.stars)) {
+				console.error("[postMessage] invalid payload:", payload);
+				return;
+			}
 
+			console.log("[postMessage] received import from", event.origin, payload);
 			startTransition(() => {
 				setStatus({ key: "receivedImport" });
 				setView("dashboard");
 			});
 
-			void handleImport(event.data.payload);
+			void handleImport(payload);
 		};
 
 		window.addEventListener("message", handler);
@@ -238,10 +242,14 @@ export function App() {
 			setError("");
 			setStatus({ key: "importingLists" });
 			const parsedPayload = payload ?? JSON.parse(importText);
+			console.log("[handleImport] importing", parsedPayload);
 			await api.importLists(parsedPayload);
+			console.log("[handleImport] success, reloading dashboard");
 			setImportText("");
 			await loadDashboard();
+			console.log("[handleImport] dashboard reloaded");
 		} catch (caughtError) {
+			console.error("[handleImport] error:", caughtError);
 			setError(caughtError instanceof Error ? caughtError.message : "Failed to import GitHub lists");
 		}
 	}
