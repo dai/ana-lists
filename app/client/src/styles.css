@@ -605,6 +605,97 @@ a {
 	border-color: rgba(159, 61, 50, 0.28);
 }
 
+/* Spreadsheet-style matrix for List editor */
+.matrix-wrapper {
+	overflow: auto;
+	max-height: 60vh;
+	border-radius: 12px;
+	border: 1px solid var(--line);
+}
+
+.matrix-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+.matrix-repo-header,
+.matrix-list-header {
+	position: sticky;
+	top: 0;
+	background: var(--bg-input);
+	border-bottom: 1px solid var(--line);
+	padding: 8px 12px;
+	text-align: left;
+	white-space: nowrap;
+	z-index: 1;
+}
+
+.matrix-repo-header {
+	min-width: 200px;
+	width: 200px;
+	font-weight: 600;
+}
+
+.matrix-list-header {
+	min-width: 80px;
+	text-align: center;
+}
+
+.matrix-list-name {
+	display: block;
+	max-width: 120px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.matrix-repo-cell {
+	padding: 6px 12px;
+	border-bottom: 1px solid color-mix(in srgb, var(--line) 50%, transparent);
+	vertical-align: middle;
+}
+
+.matrix-repo-name {
+	display: block;
+	max-width: 180px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-weight: 500;
+}
+
+.matrix-checkbox-cell {
+	padding: 4px 8px;
+	text-align: center;
+	border-bottom: 1px solid color-mix(in srgb, var(--line) 50%, transparent);
+	vertical-align: middle;
+}
+
+.matrix-checkbox-cell input[type="checkbox"] {
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+	accent-color: var(--accent);
+}
+
+.matrix-row-highlight {
+	animation: row-flash 3s ease-out forwards;
+}
+
+@keyframes row-flash {
+	0% { background: rgba(234, 179, 8, 0.25); }
+	60% { background: rgba(234, 179, 8, 0.1); }
+	100% { background: transparent; }
+}
+
+.import-timestamp {
+	transition: color 0.3s ease;
+}
+
+.import-timestamp.highlight {
+	color: var(--accent);
+	font-weight: 600;
+}
+
 .history-grid {
 	flex-wrap: wrap;
 }

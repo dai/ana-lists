@@ -76,6 +76,7 @@ export function App() {
 	const [error, setError] = useState("");
 	const [savingUserId, setSavingUserId] = useState<number | null>(null);
 	const [desiredAssignments, setDesiredAssignments] = useState<DesiredAssignment[]>([]);
+	const [highlightedRepoIds, setHighlightedRepoIds] = useState<Set<number>>(new Set());
 	const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
 	const t = copy[language];
@@ -243,10 +244,22 @@ export function App() {
 			setStatus({ key: "importingLists" });
 			const parsedPayload = payload ?? JSON.parse(importText);
 			console.log("[handleImport] importing", parsedPayload);
+
+			// Capture imported repo IDs before reload
+			const importedRepoIds = new Set<number>();
+			for (const star of (parsedPayload as { stars?: { githubRepoId: number }[] }).stars ?? []) {
+				importedRepoIds.add(star.githubRepoId);
+			}
+
 			await api.importLists(parsedPayload);
-			console.log("[handleImport] success, reloading dashboard");
 			setImportText("");
 			await loadDashboard();
+
+			// Highlight imported repos and fade out after 3s
+			if (importedRepoIds.size > 0) {
+				setHighlightedRepoIds(importedRepoIds);
+				setTimeout(() => setHighlightedRepoIds(new Set()), 3000);
+			}
 			console.log("[handleImport] dashboard reloaded");
 		} catch (caughtError) {
 			console.error("[handleImport] error:", caughtError);
@@ -741,53 +754,50 @@ export function App() {
 							<button className="primary-button" onClick={() => void handleRecomputeQueue()} type="button">
 								{t.lists.recomputeQueue}
 							</button>
-							<span className="helper-copy">
-								{t.lists.lastImport}:{" "}
-								{workspace?.lastImportedAt ? formatDate(workspace.lastImportedAt, language) : t.lists.never}
+							<span
+								className={`helper-copy import-timestamp${highlightedRepoIds.size > 0 ? " highlight" : ""}`}
+								title={workspace?.lastImportedAt ? formatDate(workspace.lastImportedAt, language) : ""}
+							>
+								{t.lists.lastImport}
+								{workspace?.lastImportedAt ? ` ${formatDate(workspace.lastImportedAt, language)}` : ` ${t.lists.never}`}
 							</span>
 						</div>
 
-						<div className="list-columns">
-							<div className="list-column">
-								<h3>{t.lists.officialLists}</h3>
-								{workspace?.lists.length ? (
-									workspace.lists.map((list) => (
-										<div className="list-chip" key={list.githubListId}>
-											<strong>{list.name}</strong>
-											<span>{list.description || t.lists.noDescription}</span>
-										</div>
-									))
-								) : (
-									<p className="empty-state">{t.lists.importEmpty}</p>
-								)}
-							</div>
-
-							<div className="list-column stretch">
-								<h3>{t.lists.desiredStateEditor}</h3>
-								<div className="workspace-table">
-									{workspace?.repositories.map((repository) => (
-										<div className="workspace-row" key={repository.githubRepoId}>
-											<div>
-												<strong>{repository.fullName}</strong>
-												<p>{repository.description || t.lists.noDescription}</p>
-												<div className="tag-row">
-													{repository.labels.slice(0, 6).map((label) => (
-														<span className="tag muted" key={label}>
-															{label}
-														</span>
-													))}
-												</div>
-											</div>
-											<div className="checkbox-grid">
+						{/* Spreadsheet-style matrix: rows=repos, columns=lists */}
+						{workspace?.lists.length ? (
+							<div className="matrix-wrapper">
+								<table className="matrix-table">
+									<thead>
+										<tr>
+											<th className="matrix-repo-header">リポジトリ</th>
+											{workspace.lists.map((list) => (
+												<th key={list.githubListId} className="matrix-list-header">
+													<span className="matrix-list-name" title={list.description || list.name}>
+														{list.name}
+													</span>
+												</th>
+											))}
+										</tr>
+									</thead>
+									<tbody>
+										{workspace.repositories.map((repository) => (
+											<tr
+												key={repository.githubRepoId}
+												className={highlightedRepoIds.has(repository.githubRepoId) ? "matrix-row-highlight" : ""}
+											>
+												<td className="matrix-repo-cell">
+													<span className="matrix-repo-name" title={repository.description || ""}>
+														{repository.fullName}
+													</span>
+												</td>
 												{workspace.lists.map((list) => {
 													const checked = desiredAssignments.some(
 														(item) =>
 															item.githubRepoId === repository.githubRepoId &&
 															item.githubListId === list.githubListId,
 													);
-
 													return (
-														<label className="checkbox" key={`${repository.githubRepoId}-${list.githubListId}`}>
+														<td key={list.githubListId} className="matrix-checkbox-cell">
 															<input
 																type="checkbox"
 																checked={checked}
@@ -798,17 +808,19 @@ export function App() {
 																		event.target.checked,
 																	)
 																}
+																title={`${repository.fullName} → ${list.name}`}
 															/>
-															{list.name}
-														</label>
+														</td>
 													);
 												})}
-											</div>
-										</div>
-									))}
-								</div>
+											</tr>
+										))}
+									</tbody>
+								</table>
 							</div>
-						</div>
+						) : (
+							<p className="empty-state">{t.lists.importEmpty}</p>
+						)}
 
 						<div className="diff-grid">
 							<div>
