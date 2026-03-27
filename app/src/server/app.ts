@@ -446,9 +446,38 @@ function resolveAppOrigin(request: Request, env: AppEnv) {
 }
 
 function buildImportHelper(appOrigin: string) {
-	// Fixed: location.origin fallback, proper error handling, try-catch wrapper
 	const source = `
-javascript:(async()=>{try{const appOrigin=${JSON.stringify(appOrigin)};const pageOrigin=(typeof location!=="undefined"&&location.protocol)?location.protocol+"//"+location.host:"";const rows=document.querySelectorAll("li");const repos=[];const seen=new Set();for(const row of rows){const anchor=row.querySelector("a.text-bold");if(!anchor)continue;const href=anchor.getAttribute("href")||"";if(!href.includes("/"))continue;const parts=href.split("/").filter(Boolean);if(parts.length<2)continue;const fullName=parts[0]+"/"+parts[1];if(fullName.includes("...")||fullName.includes("%"))continue;if(seen.has(fullName))continue;seen.add(fullName);const descEl=row.querySelector("p");const description=descEl?descEl.textContent.trim():"";repos.push({githubRepoId:Math.abs(fullName.split("").reduce((a,c)=>a+c.charCodeAt(0),0)),fullName,description,url:pageOrigin+href,lists:[]})}const h1=document.querySelector("h1");const currentList=h1?h1.textContent.trim():"";const lists=currentList?[{githubListId:currentList.toLowerCase().replace(/[^a-z0-9]+/g,"-"),name:currentList,description:"Imported from GitHub page"}]:[];const payload={exportedAt:new Date().toISOString(),stars:repos,lists};const popup=window.open(appOrigin,"gslcrm-import");if(!popup){alert("Popup blocked. Allow popups for this site and try again.");return}const send=()=>{try{console.log("Sending",repos.length,"repos to",appOrigin,payload);popup.postMessage({type:"github-stars-import",payload},"*")}catch(e){console.error("postMessage failed:",e)}};send();setTimeout(send,1000);setTimeout(send,2000)}catch(e){console.error("Bookmarklet error:",e);alert("Error:"+e.message)}})();`.replace(/\s+/g," ");
+javascript:(async()=>{try{
+const appOrigin=${JSON.stringify(appOrigin)};
+const pageOrigin=(typeof location!=="undefined"&&location.protocol)?location.protocol+"//"+location.host:"";
+// GitHub stars page: #user-list-repositories contains repo entries with h2 a hrefs
+const anchors=document.querySelectorAll("#user-list-repositories h2 a");
+const repos=[];
+const seen=new Set();
+for(const anchor of anchors){
+  const href=anchor.getAttribute("href")||"";
+  if(!href.includes("/"))continue;
+  const parts=href.split("/").filter(Boolean);
+  if(parts.length<2)continue;
+  const fullName=parts[0]+"/"+parts[1];
+  if(fullName.includes("...")||fullName.includes("%"))continue;
+  if(seen.has(fullName))continue;
+  seen.add(fullName);
+  // description is in the sibling/parent div's p element
+  const container=anchor.closest(".d-inline-block");
+  const descEl=container?container.nextElementSibling:null;
+  const description=descEl&&descEl.tagName==="P"?descEl.textContent.trim():"";
+  repos.push({githubRepoId:Math.abs(fullName.split("").reduce((a,c)=>a+c.charCodeAt(0),0)),fullName,description,url:pageOrigin+href,lists:[]})
+}
+const h1=document.querySelector("h1");
+const currentList=h1?h1.textContent.trim():"";
+const lists=currentList?[{githubListId:currentList.toLowerCase().replace(/[^a-z0-9]+/g,"-"),name:currentList,description:"Imported from GitHub page"}]:[];
+const payload={exportedAt:new Date().toISOString(),stars:repos,lists};
+const popup=window.open(appOrigin,"gslcrm-import");
+if(!popup){alert("Popup blocked. Allow popups for this site and try again.");return}
+const send=()=>{try{console.log("Sending",repos.length,"repos to",appOrigin,payload);popup.postMessage({type:"github-stars-import",payload},"*")}catch(e){console.error("postMessage failed:",e)}};
+send();setTimeout(send,1000);setTimeout(send,2000)
+}catch(e){console.error("Bookmarklet error:",e);alert("Error:"+e.message)}})();`.replace(/\s+/g," ");
 
 	return source;
 }
