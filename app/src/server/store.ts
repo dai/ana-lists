@@ -305,9 +305,30 @@ export class D1Store {
 		userId: number,
 		filters: Parameters<typeof filterStargazers>[1],
 	): Promise<StargazerView[]> {
-		const stargazerRows = await this.db
-			.prepare(
-				`SELECT
+		const { repositoryId, ...remainingFilters } = filters;
+
+		// Query 1: Push repositoryId filter to SQL when present to reduce rows scanned
+		const query1 = repositoryId !== undefined
+			? `SELECT
+            s.github_user_id,
+            s.login,
+            s.name,
+            s.bio,
+            s.company,
+            s.followers,
+            s.public_repos,
+            s.starred_at,
+            COALESCE(a.tags_json, '[]') AS tags_json,
+            COALESCE(a.saved, 0) AS saved,
+            COALESCE(a.note, '') AS note
+         FROM stargazer_snapshots s
+         LEFT JOIN stargazer_annotations a
+           ON a.user_id = s.user_id
+          AND a.github_user_id = s.github_user_id
+         WHERE s.user_id = ? AND s.tracked_repository_id = ?
+         ORDER BY s.starred_at DESC
+         LIMIT 1000`
+			: `SELECT
             s.github_user_id,
             MIN(s.login) AS login,
             MIN(s.name) AS name,
@@ -326,10 +347,24 @@ export class D1Store {
          WHERE s.user_id = ?
          GROUP BY s.github_user_id
          ORDER BY MAX(s.starred_at) DESC
-         LIMIT 1000`,
-			)
-			.bind(userId)
-			.all<{
+         LIMIT 1000`;
+
+		const stargazerStmt = this.db.prepare(query1);
+		const stargazerRows = repositoryId !== undefined
+			? await stargazerStmt.bind(userId, repositoryId).all<{
+				github_user_id: number;
+				login: string;
+				name: string;
+				bio: string;
+				company: string;
+				followers: number;
+				public_repos: number;
+				starred_at: string;
+				tags_json: string;
+				saved: number;
+				note: string;
+			}>()
+			: await stargazerStmt.bind(userId).all<{
 				github_user_id: number;
 				login: string;
 				name: string;
@@ -343,9 +378,18 @@ export class D1Store {
 				note: string;
 			}>();
 
-		const repositoryRows = await this.db
-			.prepare(
-				`SELECT DISTINCT
+		// Query 2: Push repositoryId filter to SQL when present
+		const query2 = repositoryId !== undefined
+			? `SELECT
+            s.github_user_id,
+            tr.id AS repository_id,
+            tr.full_name
+         FROM stargazer_snapshots s
+         JOIN tracked_repositories tr ON tr.id = s.tracked_repository_id
+         WHERE s.user_id = ? AND s.tracked_repository_id = ?
+         ORDER BY tr.full_name
+         LIMIT 5000`
+			: `SELECT DISTINCT
             s.github_user_id,
             tr.id AS repository_id,
             tr.full_name
@@ -353,10 +397,16 @@ export class D1Store {
          JOIN tracked_repositories tr ON tr.id = s.tracked_repository_id
          WHERE s.user_id = ?
          ORDER BY tr.full_name
-         LIMIT 5000`,
-			)
-			.bind(userId)
-			.all<{
+         LIMIT 5000`;
+
+		const repoStmt = this.db.prepare(query2);
+		const repositoryRows = repositoryId !== undefined
+			? await repoStmt.bind(userId, repositoryId).all<{
+				github_user_id: number;
+				repository_id: number;
+				full_name: string;
+			}>()
+			: await repoStmt.bind(userId).all<{
 				github_user_id: number;
 				repository_id: number;
 				full_name: string;
@@ -385,7 +435,7 @@ export class D1Store {
 			repositories: repositoriesByUser.get(row.github_user_id) ?? [],
 		}));
 
-		return filterStargazers(records, filters).map((record) => ({
+		return filterStargazers(records, remainingFilters).map((record) => ({
 			...record,
 			repositories: record.repositories,
 		}));
